@@ -1,6 +1,7 @@
 use std::clone::Clone;
 use std::cmp::PartialEq;
 use std::fmt::{Debug, Display, Formatter, Result};
+use std::slice::Iter;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Operator {
@@ -8,6 +9,12 @@ pub enum Operator {
     Sub,
     Mul,
     Div,
+}
+
+impl Operator {
+    pub fn iterator() -> Iter<'static, Self> {
+        [Operator::Add, Operator::Sub, Operator::Mul, Operator::Div].into_iter()
+    }
 }
 
 impl Display for Operator {
@@ -30,23 +37,31 @@ pub struct Operation {
 
 impl Operation {
     pub fn new(operator: Operator, operand_1: u16, operand_2: u16) -> Option<Self> {
-        match operator {
-            Operator::Div => {
-                if operand_1 % operand_2 == 0 {
-                    Some(Operation {
-                        operand_1,
-                        operand_2,
-                        operator,
-                    })
-                } else {
-                    None
-                }
+        if operand_1 == 0 || operand_2 == 0 { None }
+        else {
+            match operator {
+                Operator::Div => {
+                    if operand_1 % operand_2 == 0 {
+                        Some(Operation {
+                            operand_1,
+                            operand_2,
+                            operator,
+                        })
+                    } else {
+                        None
+                    }
+                },
+                Operator::Sub => {
+                    if operand_1 > operand_2 {
+                        Some(Operation {operand_1, operand_2, operator})
+                    } else {None}
+                },
+                _ => Some(Operation {
+                    operand_1,
+                    operand_2,
+                    operator,
+                }),
             }
-            _ => Some(Operation {
-                operand_1,
-                operand_2,
-                operator,
-            }),
         }
     }
 
@@ -108,6 +123,16 @@ impl Solution {
         Solution {
             operations: operations,
         }
+    }
+
+    pub fn new_empty() -> Self {
+        Solution {
+            operations: Vec::new(),
+        }
+    }
+
+    pub fn push(&mut self, operation: Operation) {
+        self.operations.push(operation);
     }
 }
 

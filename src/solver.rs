@@ -1,8 +1,40 @@
 mod types;
 
+use types::{Operation, Operator, Solution};
+
 #[cfg(test)]
 mod tests {
     use super::types::{Operation, Operator, Solution};
+
+    #[test]
+    fn test_invalid_addition_creation_1() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Add, 0, 5));
+    }
+
+    #[test]
+    fn test_invalid_addition_creation_2() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Add, 5, 0));
+    }
+
+    #[test]
+    fn test_invalid_substraction_creation_1() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Sub, 5, 100));
+    }
+
+    #[test]
+    fn test_invalid_substraction_creation_2() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Sub, 5, 5));
+    }
+
+    #[test]
+    fn test_invalid_multiplication_creation_1() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Mul, 0, 5));
+    }
+
+    #[test]
+    fn test_invalid_multiplication_creation_2() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Mul, 5, 0));
+    }
 
     #[test]
     fn test_invalid_division_creation_1() {
@@ -12,6 +44,11 @@ mod tests {
     #[test]
     fn test_invalid_division_creation_2() {
         assert_eq!(None::<Operation>, Operation::new(Operator::Div, 16, 3));
+    }
+
+    #[test]
+    fn test_invalid_division_creation_3() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Div, 16, 0));
     }
 
     #[test]
@@ -172,5 +209,72 @@ mod tests {
         let solution_11 = Solution::new(solution_11_operations);
         let solution_12 = Solution::new(solution_12_operations);
         assert_ne!(solution_11, solution_12);
+    }
+}
+
+pub fn solve(tiles: Vec<u16>, target_result: u16) -> Vec<Solution> {
+    let mut working_tiles = get_working_tiles_from_inputs(&tiles);
+    let mut solutions: Vec<Solution> = Vec::new();
+    resolve_recur(
+        &mut working_tiles,
+        target_result,
+        &mut solutions,
+        &mut Solution::new_empty(),
+    );
+
+    solutions
+}
+
+fn get_working_tiles_from_inputs(inputs: &Vec<u16>) -> Vec<Option<u16>> {
+    let mut result = Vec::new();
+
+    for current_input in inputs {
+        result.push(Some(*current_input));
+    }
+
+    result
+}
+
+fn resolve_recur(
+    working_tiles: &mut Vec<Option<u16>>,
+    target_result: u16,
+    solutions: &mut Vec<Solution>,
+    current_solution: &mut Solution,
+) {
+    let working_tiles_len = working_tiles.len();
+
+    'outer_loop: for first_tile_index in 0..working_tiles_len {
+        for second_tile_index in 0..working_tiles_len {
+            if first_tile_index == second_tile_index {
+                continue;
+            }
+            let first_tile_opt = working_tiles[first_tile_index];
+            let second_tile_opt = working_tiles[second_tile_index];
+            if first_tile_opt.is_none() || second_tile_opt.is_none() {
+                continue;
+            }
+
+            let first_tile = first_tile_opt.unwrap();
+            let second_tile = second_tile_opt.unwrap();
+
+            for operator in Operator::iterator() {
+                let operation_opt = Operation::new((*operator).clone(), first_tile, second_tile);
+                if operation_opt.is_none() {
+                    continue;
+                }
+
+                let operation = operation_opt.unwrap();
+                current_solution.push(operation.clone());
+
+                if operation.value() == target_result {
+                    solutions.push(current_solution.clone());
+                    break 'outer_loop;
+                } else {
+                    working_tiles[first_tile_index] = Some(operation.value());
+                    working_tiles[second_tile_index] = None;
+                    resolve_recur(working_tiles, target_result, solutions, current_solution);
+                }
+            }
+        }
     }
 }
