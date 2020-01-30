@@ -1,9 +1,8 @@
-use std::cmp::PartialEq;
+mod types;
 
 #[cfg(test)]
 mod tests {
-    use crate::solver::Operation;
-    use crate::solver::Operator;
+    use super::types::{Operation, Operator};
 
     #[test]
     fn test_invalid_division_creation_1() {
@@ -40,58 +39,20 @@ mod tests {
         assert_eq!(Operation::new(Operator::Div, 10, 2), Operation::new(Operator::Div, 10, 2));
         assert_ne!(Operation::new(Operator::Div, 10, 2), Operation::new(Operator::Div, 5, 1));
     }
-}
 
-#[derive(PartialEq, Debug)]
-pub enum Operator {
-    Add,
-    Sub,
-    Mul,
-    Div,
-}
-
-#[derive(Debug)]
-pub struct Operation {
-    operand_1: u16,
-    operand_2: u16,
-    operator: Operator,
-}
-
-impl Operation {
-    pub fn new(operator: Operator, operand_1: u16, operand_2: u16) -> Option<Self> {
-        match operator {
-            Operator::Div => {
-                if operand_1 % operand_2 == 0 {
-                    Some(Operation {
-                        operand_1,
-                        operand_2,
-                        operator,
-                    })
-                } else {
-                    None
-                }
-            }
-            _ => Some(Operation {
-                operand_1,
-                operand_2,
-                operator,
-            }),
-        }
+    #[test]
+    fn test_operations_results() {
+        assert_eq!(5, Operation::new(Operator::Add, 3, 2).unwrap().value());
+        assert_eq!(2, Operation::new(Operator::Sub, 6, 4).unwrap().value());
+        assert_eq!(6, Operation::new(Operator::Mul, 3, 2).unwrap().value());
+        assert_eq!(5, Operation::new(Operator::Div, 10, 2).unwrap().value());
     }
-}
 
-impl PartialEq for Operation {
-    fn eq(&self, other: &Self) -> bool {
-        if self.operator != other.operator {
-            false
-        } else {
-            match self.operator {
-                Operator::Add | Operator::Mul => {
-                    (self.operand_1 == other.operand_1 && self.operand_2 == other.operand_2)
-                        || (self.operand_1 == other.operand_2 && self.operand_2 == other.operand_1)
-                }
-                _ => self.operand_1 == other.operand_1 && self.operand_2 == other.operand_2,
-            }
-        }
+    #[test]
+    fn test_operations_display() {
+        assert_eq!("3 + 2 = 5", format!("{}", Operation::new(Operator::Add, 3, 2).unwrap()));
+        assert_eq!("6 - 4 = 2", format!("{}", Operation::new(Operator::Sub, 6, 4).unwrap()));
+        assert_eq!("3 * 2 = 6", format!("{}", Operation::new(Operator::Mul, 3, 2).unwrap()));
+        assert_eq!("10 / 2 = 5", format!("{}", Operation::new(Operator::Div, 10, 2).unwrap()));
     }
 }
