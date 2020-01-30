@@ -241,18 +241,7 @@ fn resolve_recur(
     solutions: &mut Vec<Solution>,
     current_solution: Solution,
 ) { 
-    let mut local_working_tiles = working_tiles.clone();
-    let working_tiles_len = local_working_tiles.len();
-
-    //////////////////////////////////////////////////
-    let working_tiles_str = working_tiles.clone()
-    .into_iter()
-    .filter(|v| v.is_some())
-    .map(|v| v.unwrap().to_string())
-    .collect::<Vec<_>>()
-    .join(", ");
-    println!("{}", working_tiles_str);
-    //////////////////////////////////////////////////
+    let working_tiles_len = working_tiles.len();
 
     'outer_loop: for first_tile_index in 0..working_tiles_len {
         for second_tile_index in 0..working_tiles_len {
@@ -282,10 +271,11 @@ fn resolve_recur(
                     solutions.push(local_current_solutions.clone());
                     break 'outer_loop;
                 } else {
+                    let mut local_working_tiles = working_tiles.clone();
                     local_working_tiles[first_tile_index] = Some(operation.value());
                     local_working_tiles[second_tile_index] = None;
                     resolve_recur(
-                        local_working_tiles.clone(),
+                        local_working_tiles,
                         target_result,
                         solutions,
                         local_current_solutions.clone(),
