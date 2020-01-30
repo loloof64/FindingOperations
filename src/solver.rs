@@ -212,20 +212,20 @@ mod tests {
     }
 }
 
-pub fn solve(tiles: Vec<u16>, target_result: u16) -> Vec<Solution> {
-    let mut working_tiles = get_working_tiles_from_inputs(&tiles);
+pub fn solve(tiles: Vec<u32>, target_result: u32) -> Vec<Solution> {
+    let working_tiles = get_working_tiles_from_inputs(&tiles);
     let mut solutions: Vec<Solution> = Vec::new();
     resolve_recur(
-        &mut working_tiles,
+        working_tiles,
         target_result,
         &mut solutions,
-        &mut Solution::new_empty(),
+        Solution::new_empty(),
     );
 
     solutions
 }
 
-fn get_working_tiles_from_inputs(inputs: &Vec<u16>) -> Vec<Option<u16>> {
+fn get_working_tiles_from_inputs(inputs: &Vec<u32>) -> Vec<Option<u32>> {
     let mut result = Vec::new();
 
     for current_input in inputs {
@@ -236,12 +236,23 @@ fn get_working_tiles_from_inputs(inputs: &Vec<u16>) -> Vec<Option<u16>> {
 }
 
 fn resolve_recur(
-    working_tiles: &mut Vec<Option<u16>>,
-    target_result: u16,
+    working_tiles: Vec<Option<u32>>,
+    target_result: u32,
     solutions: &mut Vec<Solution>,
-    current_solution: &mut Solution,
-) {
-    let working_tiles_len = working_tiles.len();
+    current_solution: Solution,
+) { 
+    let mut local_working_tiles = working_tiles.clone();
+    let working_tiles_len = local_working_tiles.len();
+
+    //////////////////////////////////////////////////
+    let working_tiles_str = working_tiles.clone()
+    .into_iter()
+    .filter(|v| v.is_some())
+    .map(|v| v.unwrap().to_string())
+    .collect::<Vec<_>>()
+    .join(", ");
+    println!("{}", working_tiles_str);
+    //////////////////////////////////////////////////
 
     'outer_loop: for first_tile_index in 0..working_tiles_len {
         for second_tile_index in 0..working_tiles_len {
@@ -264,15 +275,21 @@ fn resolve_recur(
                 }
 
                 let operation = operation_opt.unwrap();
-                current_solution.push(operation.clone());
+                let mut local_current_solutions = current_solution.clone();
+                local_current_solutions.push(operation.clone());
 
                 if operation.value() == target_result {
-                    solutions.push(current_solution.clone());
+                    solutions.push(local_current_solutions.clone());
                     break 'outer_loop;
                 } else {
-                    working_tiles[first_tile_index] = Some(operation.value());
-                    working_tiles[second_tile_index] = None;
-                    resolve_recur(working_tiles, target_result, solutions, current_solution);
+                    local_working_tiles[first_tile_index] = Some(operation.value());
+                    local_working_tiles[second_tile_index] = None;
+                    resolve_recur(
+                        local_working_tiles.clone(),
+                        target_result,
+                        solutions,
+                        local_current_solutions.clone(),
+                    );
                 }
             }
         }

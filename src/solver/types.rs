@@ -30,13 +30,13 @@ impl Display for Operator {
 
 #[derive(Debug)]
 pub struct Operation {
-    operand_1: u16,
-    operand_2: u16,
+    operand_1: u32,
+    operand_2: u32,
     operator: Operator,
 }
 
 impl Operation {
-    pub fn new(operator: Operator, operand_1: u16, operand_2: u16) -> Option<Self> {
+    pub fn new(operator: Operator, operand_1: u32, operand_2: u32) -> Option<Self> {
         if operand_1 == 0 || operand_2 == 0 { None }
         else {
             match operator {
@@ -65,7 +65,7 @@ impl Operation {
         }
     }
 
-    pub fn value(&self) -> u16 {
+    pub fn value(&self) -> u32 {
         match self.operator {
             Operator::Add => self.operand_1 + self.operand_2,
             Operator::Sub => self.operand_1 - self.operand_2,
