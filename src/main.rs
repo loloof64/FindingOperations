@@ -1,7 +1,8 @@
+mod gui;
 mod solver;
-use solver::solve;
+
+use crate::gui::run;
 
 fn main() {
-    let solutions = solve(vec![2,3,100,10,6], 294);
-    println!("{:?}", solutions);
+    run();
 }

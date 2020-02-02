@@ -1,6 +1,7 @@
 mod types;
 
-use types::{Operation, Operator, Solution};
+use self::types::{Operation, Operator};
+pub use types::Solution;
 
 #[cfg(test)]
 mod tests {

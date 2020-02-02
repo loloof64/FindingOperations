@@ -5,3 +5,6 @@ authors = ["Laurent Bernabe <laurent.bernabe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+gtk = "^0.7.0"
+relm = "^0.18.0"
+relm-derive = "^0.18.0"
