@@ -123,6 +123,58 @@ impl Widget for TargetNumberComp {
     }
 }
 
+pub struct SolutionModel {
+
+}
+
+#[derive(Msg)]
+pub enum SolutionMsg {
+
+}
+
+#[widget]
+impl Widget for SolutionComponent {
+    fn init_view(&mut self) {
+        self.current_solution.get_buffer().unwrap().set_text("\n\n\n\n");
+    }
+
+    fn model() -> SolutionModel {
+        SolutionModel {}
+    }
+
+    fn update(&mut self, msg: SolutionMsg) {
+
+    }
+
+    view! {
+        gtk::Box {
+            orientation: Vertical,
+            gtk::Box {
+                orientation: Horizontal,
+                spacing: 4,
+                homogeneous: true,
+                gtk::Button {
+                    label: "|<"
+                },
+                gtk::Button {
+                    label: "<"
+                },
+                gtk::Button {
+                    label: ">"
+                },
+                gtk::Button {
+                    label: ">|"
+                },
+            },
+            #[name="current_solution"]
+            gtk::TextView {
+                editable: false,
+
+            }
+        }
+    }
+}
+
 pub struct AppModel {
     
 }
@@ -150,6 +202,7 @@ impl Widget for Win {
         gtk::Window {
             gtk::Box {
                 orientation: Vertical,
+                spacing: 4,
 
                 #[name="tiles"]
                 TilesComp {},
@@ -161,6 +214,8 @@ impl Widget for Win {
                     label: "Solve",
                     hexpand: true,
                 },
+
+                SolutionComponent {},
             },
 
             delete_event(_, _) => (AppMsg::Quit, Inhibit(false)),
