@@ -118,6 +118,7 @@ impl Widget for TargetNumberComp {
                 text: &self.model.value.to_string(),
                 hexpand: true,
             },
+
         }
     }
 }
@@ -155,6 +156,11 @@ impl Widget for Win {
                 
                 #[name="target"]
                 TargetNumberComp {},
+
+                gtk::Button {
+                    label: "Solve",
+                    hexpand: true,
+                },
             },
 
             delete_event(_, _) => (AppMsg::Quit, Inhibit(false)),
