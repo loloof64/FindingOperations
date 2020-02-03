@@ -87,8 +87,43 @@ impl Widget for TilesComp {
     }
 }
 
+#[derive(Msg)]
+pub enum TargetNumberMsg {
+    Update(u32),
+}
+
+pub struct TargetNumberModel {
+    value: u32,
+}
+
+#[widget]
+impl Widget for TargetNumberComp {
+    fn model() -> TargetNumberModel {
+        TargetNumberModel {
+            value: 0,
+        }
+    }
+
+    fn update(&mut self, event: TargetNumberMsg) {
+        match event {
+            TargetNumberMsg::Update(new_val) => self.model.value = new_val,
+        }
+    }
+
+    view! {
+        gtk::Box {
+            orientation: Horizontal,
+            gtk::Label {
+                justify: gtk::Justification::Center,
+                text: &self.model.value.to_string(),
+                hexpand: true,
+            },
+        }
+    }
+}
+
 pub struct AppModel {
-    tiles_comp: Component<TilesComp>,
+    
 }
 
 #[derive(Msg)]
@@ -99,9 +134,8 @@ pub enum AppMsg {
 #[widget]
 impl Widget for Win {
     fn model() -> AppModel {
-        let tiles = init::<TilesComp>(()).expect("Failed to build tiles component");
         AppModel {
-            tiles_comp: tiles,
+
         }
     }
 
@@ -116,7 +150,11 @@ impl Widget for Win {
             gtk::Box {
                 orientation: Vertical,
 
-                center_widget: Some(self.model.tiles_comp.widget()),
+                #[name="tiles"]
+                TilesComp {},
+                
+                #[name="target"]
+                TargetNumberComp {},
             },
 
             delete_event(_, _) => (AppMsg::Quit, Inhibit(false)),
