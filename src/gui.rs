@@ -1,12 +1,12 @@
 use crate::solver::{Solution};
 
-use gtk::{prelude::*, Inhibit, Orientation::Horizontal};
+use gtk::{prelude::*, Inhibit, Orientation::Horizontal, Orientation::Vertical};
 use relm::{Widget};
 use relm_derive::{Msg, widget};
 
 #[derive(Msg)]
 pub enum TilesMsg {
-    Update(u8, u32),
+    Update(usize, u32),
 }
 
 pub struct TilesModel {
@@ -36,27 +36,59 @@ impl Widget for TilesComp {
                 editing_done => {
                     
                 }
-            }
+            },
+
+            gtk::Entry {
+                
+            },
+
+            gtk::Entry {
+                
+            },
+
+            gtk::Entry {
+                
+            },
+
+            gtk::Entry {
+                
+            },
 
             gtk::Entry {
                 
             }
+        }
+    }
+}
 
-            gtk::Entry {
-                
-            }
+pub struct AppModel {
 
-            gtk::Entry {
-                
-            }
+}
 
-            gtk::Entry {
-                
-            }
+#[derive(Msg)]
+pub enum AppMsg {
+    Quit,
+}
 
-            gtk::Entry {
-                
-            }
+#[widget]
+impl Widget for Win {
+    fn model() -> AppModel {
+        AppModel {}
+    }
+
+    fn update(&mut self, event: AppMsg) {
+        match event {
+            Quit => gtk::main_quit(),
+        }
+    }
+
+    view! {
+        gtk::Window {
+            gtk::Box {
+                orientation: Vertical
+            },
+
+            delete_event(_, _) => (AppMsg::Quit, Inhibit(false)),
         }
     }
 }
