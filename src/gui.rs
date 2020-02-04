@@ -23,13 +23,6 @@ impl Widget for TilesComp {
     }
 
     fn set_model_in_tile(&mut self, tile_component_index: isize) {
-        let list_store = gtk::ListStore::new(&[u32::static_type()]);
-        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
-
-        for current in values.iter() {
-            list_store.insert_with_values(None, &[0], &[current]);
-        }
-
         let tile_component = match tile_component_index {
             0 => &self.tile_0,
             1 => &self.tile_1,
@@ -40,10 +33,13 @@ impl Widget for TilesComp {
             _ => panic!("Incorrect tile index")
         };
 
-        tile_component.set_model(Some(&list_store));
-        let renderer = CellRendererText::new();
-        tile_component.pack_start(&renderer, true);
-        tile_component.add_attribute(&renderer, "text", 0);
+        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
+
+        for current in values.iter() {
+            tile_component.append_text(&current.to_string().to_owned());
+        }
+
+        tile_component.set_active(Some(0));
     }
 
     fn model(relm: &Relm<Self>, _: ()) -> TilesModel {
@@ -65,22 +61,22 @@ impl Widget for TilesComp {
             spacing: 4,
 
             #[name="tile_0"]
-            gtk::ComboBox {},
+            gtk::ComboBoxText {},
 
             #[name="tile_1"]
-            gtk::ComboBox {},
+            gtk::ComboBoxText {},
 
             #[name="tile_2"]
-            gtk::ComboBox {},
+            gtk::ComboBoxText {},
 
             #[name="tile_3"]
-            gtk::ComboBox {},
+            gtk::ComboBoxText {},
 
             #[name="tile_4"]
-            gtk::ComboBox {},
+            gtk::ComboBoxText {},
 
             #[name="tile_5"]
-            gtk::ComboBox {},
+            gtk::ComboBoxText {},
         }
     }
 }
