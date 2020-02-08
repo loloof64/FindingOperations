@@ -113,7 +113,7 @@ pub struct TargetNumberModel {
 impl Widget for TargetNumberComp {
     fn model() -> TargetNumberModel {
         TargetNumberModel {
-            value: 0,
+            value: 1,
         }
     }
 
@@ -138,6 +138,7 @@ impl Widget for TargetNumberComp {
                 width_chars: 3,
 
                 activate(comp) => TargetNumberMsg::Update(comp.get_text().unwrap_or(GString::from(""))),
+                focus_out_event(comp, _focus_event) => (TargetNumberMsg::Update(comp.get_text().unwrap_or(GString::from(""))), Inhibit(false)),
             },
 
         }
