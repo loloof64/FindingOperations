@@ -1,7 +1,7 @@
 use crate::solver::{Solution};
 
-use gtk::{prelude::*, Inhibit, Orientation::Horizontal, Orientation::Vertical, CellRendererText};
-use relm::{Relm, Widget, Component, init, connect};
+use gtk::{prelude::*, Inhibit, Orientation::{Horizontal, Vertical} };
+use relm::{Relm, Widget, connect};
 use relm_derive::{Msg, widget};
 
 #[derive(Msg)]
@@ -10,7 +10,6 @@ pub enum TilesMsg {
 }
 
 pub struct TilesModel {
-    tiles: [u32; 6],
     relm: Relm<TilesComp>,
 }
 
@@ -19,11 +18,15 @@ impl Widget for TilesComp {
     fn init_view(&mut self) {
         for i in 0..6 {
             self.set_model_in_tile(i);
+            let current_tile = self.get_tile_component(i);
+            connect!(&current_tile, connect_changed(tile_comp), self.model.relm, 
+                Update(i, tile_comp.get_active_id().unwrap().parse::<u32>().unwrap_or(1))
+            );
         }
     }
 
-    fn set_model_in_tile(&mut self, tile_component_index: isize) {
-        let tile_component = match tile_component_index {
+    fn get_tile_component(&self, index: usize) -> &gtk::ComboBoxText {
+        match index {
             0 => &self.tile_0,
             1 => &self.tile_1,
             2 => &self.tile_2,
@@ -31,7 +34,11 @@ impl Widget for TilesComp {
             4 => &self.tile_4,
             5 => &self.tile_5,
             _ => panic!("Incorrect tile index")
-        };
+        }
+    }
+
+    fn set_model_in_tile(&mut self, tile_component_index: usize) {
+        let tile_component = self.get_tile_component(tile_component_index);
 
         let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
 
@@ -44,14 +51,17 @@ impl Widget for TilesComp {
 
     fn model(relm: &Relm<Self>, _: ()) -> TilesModel {
         TilesModel {
-            tiles: [0; 6],
             relm: relm.clone(),
         }
     }
 
     fn update(&mut self, event: TilesMsg) {
         match event {
-            TilesMsg::Update(index, new_val) => self.model.tiles[index] = new_val,
+            TilesMsg::Update(index, new_val) => {
+                ///////////////////////////////////////////////////
+                println!("Change at {} : {}", index, new_val);
+                ////////////////////////////////////////////////////
+            },
         }
     }
 
@@ -61,22 +71,34 @@ impl Widget for TilesComp {
             spacing: 4,
 
             #[name="tile_0"]
-            gtk::ComboBoxText {},
+            gtk::ComboBoxText {
+                id_column: 0,
+            },
 
             #[name="tile_1"]
-            gtk::ComboBoxText {},
+            gtk::ComboBoxText {
+                id_column: 0,
+            },
 
             #[name="tile_2"]
-            gtk::ComboBoxText {},
+            gtk::ComboBoxText {
+                id_column: 0,
+            },
 
             #[name="tile_3"]
-            gtk::ComboBoxText {},
+            gtk::ComboBoxText {
+                id_column: 0,
+            },
 
             #[name="tile_4"]
-            gtk::ComboBoxText {},
+            gtk::ComboBoxText {
+                id_column: 0,
+            },
 
             #[name="tile_5"]
-            gtk::ComboBoxText {},
+            gtk::ComboBoxText {
+                id_column: 0,
+            },
         }
     }
 }
@@ -170,26 +192,44 @@ impl Widget for SolutionComponent {
 }
 
 pub struct AppModel {
-    
+    tiles: [u32; 6],
 }
 
 #[derive(Msg)]
 pub enum AppMsg {
     Quit,
+    Solve,
+    UpdateTile(usize, u32),
 }
+
+use self::TilesMsg::*;
+use self::AppMsg::*;
 
 #[widget]
 impl Widget for Win {
     fn model() -> AppModel {
         AppModel {
-
+            tiles: [0; 6],
         }
     }
 
     fn update(&mut self, event: AppMsg) {
         match event {
-            Quit => gtk::main_quit(),
+            AppMsg::Quit => gtk::main_quit(),
+            AppMsg::Solve => self.solve(),
+            AppMsg::UpdateTile(index, new_val) => {
+                /////////////////////////////
+                println!("{}", new_val);
+                ///////////////////////////////
+                self.model.tiles[index] = new_val;
+            },
         }
+    }
+
+    fn solve(&mut self) {
+        /////////////////////////////////////
+        println!("{:?}", self.model.tiles);
+        /////////////////////////////////////
     }
 
     view! {
@@ -199,7 +239,9 @@ impl Widget for Win {
                 spacing: 4,
 
                 #[name="tiles"]
-                TilesComp {},
+                TilesComp {
+                    Update(index, new_val) => UpdateTile(index, new_val),
+                },
                 
                 #[name="target"]
                 TargetNumberComp {},
@@ -207,12 +249,13 @@ impl Widget for Win {
                 gtk::Button {
                     label: "Solve",
                     hexpand: true,
+                    clicked(_) => Solve,
                 },
 
                 SolutionComponent {},
             },
 
-            delete_event(_, _) => (AppMsg::Quit, Inhibit(false)),
+            delete_event(_, _) => (Quit, Inhibit(false)),
         }
     }
 }
