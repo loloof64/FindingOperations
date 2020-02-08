@@ -3,6 +3,7 @@ use crate::solver::{Solution};
 use gtk::{prelude::*, Inhibit, Orientation::{Horizontal, Vertical} };
 use relm::{Relm, Widget, connect};
 use relm_derive::{Msg, widget};
+use glib::GString;
 
 #[derive(Msg)]
 pub enum TilesMsg {
@@ -20,7 +21,7 @@ impl Widget for TilesComp {
             self.set_model_in_tile(i);
             let current_tile = self.get_tile_component(i);
             connect!(&current_tile, connect_changed(tile_comp), self.model.relm, 
-                Update(i, tile_comp.get_active_id().unwrap().parse::<u32>().unwrap_or(1))
+                Update(i, tile_comp.get_active_id().unwrap_or(GString::from("1")).parse::<u32>().unwrap_or(1))
             );
         }
     }
