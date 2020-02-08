@@ -58,11 +58,7 @@ impl Widget for TilesComp {
 
     fn update(&mut self, event: TilesMsg) {
         match event {
-            TilesMsg::Update(index, new_val) => {
-                ///////////////////////////////////////////////////
-                println!("Change at {} : {}", index, new_val);
-                ////////////////////////////////////////////////////
-            },
+            TilesMsg::Update(_index, _new_val) => {},
         }
     }
 
@@ -106,7 +102,7 @@ impl Widget for TilesComp {
 
 #[derive(Msg)]
 pub enum TargetNumberMsg {
-    Update(u32),
+    Update(GString),
 }
 
 pub struct TargetNumberModel {
@@ -123,7 +119,7 @@ impl Widget for TargetNumberComp {
 
     fn update(&mut self, event: TargetNumberMsg) {
         match event {
-            TargetNumberMsg::Update(new_val) => self.model.value = new_val,
+            TargetNumberMsg::Update(new_val) => self.model.value = new_val.parse::<u32>().unwrap_or(1),
         }
     }
 
@@ -133,13 +129,15 @@ impl Widget for TargetNumberComp {
 
             #[name="target_entry"]
             gtk::Entry {
-                text: &self.model.value.to_string(),
+                text: &(self.model.value.to_string()),
                 hexpand: true,
                 placeholder_text: Some("999"),
                 alignment: 0.5,
                 halign: gtk::Align::Center,
                 max_length: 3,
                 width_chars: 3,
+
+                activate(comp) => TargetNumberMsg::Update(comp.get_text().unwrap_or(GString::from(""))),
             },
 
         }
@@ -225,9 +223,6 @@ impl Widget for Win {
             AppMsg::Quit => gtk::main_quit(),
             AppMsg::Solve => self.solve(),
             AppMsg::UpdateTile(index, new_val) => {
-                /////////////////////////////
-                println!("{}", new_val);
-                ///////////////////////////////
                 self.model.tiles[index] = new_val;
             },
         }
