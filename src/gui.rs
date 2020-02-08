@@ -7,7 +7,7 @@ use glib::GString;
 
 #[derive(Msg)]
 pub enum TilesMsg {
-    Update(usize, u32),
+    UpdateTile(usize, u32),
 }
 
 pub struct TilesModel {
@@ -21,7 +21,7 @@ impl Widget for TilesComp {
             self.set_model_in_tile(i);
             let current_tile = self.get_tile_component(i);
             connect!(&current_tile, connect_changed(tile_comp), self.model.relm, 
-                Update(i, tile_comp.get_active_id().unwrap_or(GString::from("1")).parse::<u32>().unwrap_or(1))
+                UpdateTile(i, tile_comp.get_active_id().unwrap_or(GString::from("1")).parse::<u32>().unwrap_or(1))
             );
         }
     }
@@ -58,7 +58,7 @@ impl Widget for TilesComp {
 
     fn update(&mut self, event: TilesMsg) {
         match event {
-            TilesMsg::Update(_index, _new_val) => {},
+            TilesMsg::UpdateTile(_index, _new_val) => {},
         }
     }
 
@@ -102,7 +102,7 @@ impl Widget for TilesComp {
 
 #[derive(Msg)]
 pub enum TargetNumberMsg {
-    Update(GString),
+    UpdateTarget(GString),
 }
 
 pub struct TargetNumberModel {
@@ -119,7 +119,7 @@ impl Widget for TargetNumberComp {
 
     fn update(&mut self, event: TargetNumberMsg) {
         match event {
-            TargetNumberMsg::Update(new_val) => self.model.value = new_val.parse::<u32>().unwrap_or(1),
+            TargetNumberMsg::UpdateTarget(new_val) => self.model.value = new_val.parse::<u32>().unwrap_or(1),
         }
     }
 
@@ -137,8 +137,8 @@ impl Widget for TargetNumberComp {
                 max_length: 3,
                 width_chars: 3,
 
-                activate(comp) => TargetNumberMsg::Update(comp.get_text().unwrap_or(GString::from(""))),
-                focus_out_event(comp, _focus_event) => (TargetNumberMsg::Update(comp.get_text().unwrap_or(GString::from(""))), Inhibit(false)),
+                activate(comp) => TargetNumberMsg::UpdateTarget(comp.get_text().unwrap_or(GString::from(""))),
+                focus_out_event(comp, _focus_event) => (TargetNumberMsg::UpdateTarget(comp.get_text().unwrap_or(GString::from(""))), Inhibit(false)),
             },
 
         }
@@ -199,16 +199,19 @@ impl Widget for SolutionComponent {
 
 pub struct AppModel {
     tiles: [u32; 6],
+    target: u32,
 }
 
 #[derive(Msg)]
 pub enum AppMsg {
     Quit,
     Solve,
-    UpdateTile(usize, u32),
+    UpdateSolverTile(usize, u32),
+    UpdateSolverTarget(u32),
 }
 
 use self::TilesMsg::*;
+use self::TargetNumberMsg::*;
 use self::AppMsg::*;
 
 #[widget]
@@ -216,6 +219,7 @@ impl Widget for Win {
     fn model() -> AppModel {
         AppModel {
             tiles: [1; 6],
+            target: 1,
         }
     }
 
@@ -223,15 +227,19 @@ impl Widget for Win {
         match event {
             AppMsg::Quit => gtk::main_quit(),
             AppMsg::Solve => self.solve(),
-            AppMsg::UpdateTile(index, new_val) => {
+            AppMsg::UpdateSolverTile(index, new_val) => {
                 self.model.tiles[index] = new_val;
             },
+            AppMsg::UpdateSolverTarget(new_val) => {
+                self.model.target = new_val;
+            }
         }
     }
 
     fn solve(&mut self) {
         /////////////////////////////////////
         println!("{:?}", self.model.tiles);
+        println!("{}", self.model.target);
         /////////////////////////////////////
     }
 
@@ -243,11 +251,13 @@ impl Widget for Win {
 
                 #[name="tiles"]
                 TilesComp {
-                    Update(index, new_val) => UpdateTile(index, new_val),
+                    UpdateTile(index, new_val) => UpdateSolverTile(index, new_val),
                 },
                 
                 #[name="target"]
-                TargetNumberComp {},
+                TargetNumberComp {
+                    UpdateTarget(ref new_val) => UpdateSolverTarget(new_val.parse::<u32>().unwrap_or(1)),
+                },
 
                 gtk::Button {
                     label: "Solve",
