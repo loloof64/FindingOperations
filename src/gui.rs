@@ -129,10 +129,16 @@ impl Widget for TargetNumberComp {
     view! {
         gtk::Box {
             orientation: Horizontal,
-            gtk::Label {
-                justify: gtk::Justification::Center,
+
+            #[name="target_entry"]
+            gtk::Entry {
                 text: &self.model.value.to_string(),
                 hexpand: true,
+                placeholder_text: Some("999"),
+                alignment: 0.5,
+                halign: gtk::Align::Center,
+                max_length: 3,
+                width_chars: 3,
             },
 
         }
