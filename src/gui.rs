@@ -215,7 +215,7 @@ use self::AppMsg::*;
 impl Widget for Win {
     fn model() -> AppModel {
         AppModel {
-            tiles: [0; 6],
+            tiles: [1; 6],
         }
     }
 
