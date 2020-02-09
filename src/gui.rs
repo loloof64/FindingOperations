@@ -1,9 +1,10 @@
-use crate::solver::{Solution};
+use crate::solver::{Solution, solve};
 
 use gtk::{prelude::*, Inhibit, Orientation::{Horizontal, Vertical} };
 use relm::{Relm, Widget, connect};
 use relm_derive::{Msg, widget};
 use glib::GString;
+use std::io::Write;
 
 #[derive(Msg)]
 pub enum TilesMsg {
@@ -146,13 +147,16 @@ impl Widget for TargetNumberComp {
 }
 
 pub struct SolutionModel {
-
+    solutions: Vec<Solution>,
 }
 
 #[derive(Msg)]
 pub enum SolutionMsg {
-
+    SetNoSolution,
+    ShowSolution(Solution),
 }
+
+use self::SolutionMsg::*;
 
 #[widget]
 impl Widget for SolutionComponent {
@@ -161,11 +165,27 @@ impl Widget for SolutionComponent {
     }
 
     fn model() -> SolutionModel {
-        SolutionModel {}
+        SolutionModel {
+            solutions: Vec::new(),
+        }
     }
 
     fn update(&mut self, msg: SolutionMsg) {
+        match msg {
+            SetNoSolution => self.current_solution.get_buffer().unwrap().set_text("\n\nNo solution\n\n"),
+            ShowSolution(sol) => self.update_with_solution(&sol),
+        }
+    }
 
+    fn update_with_solution(&mut self, solution: &Solution) {
+        let mut message = Vec::new();
+        for operation in solution.operations.clone() {
+            if let Err(err) = write!(&mut message, "{}", operation) {
+                println!("Failed to append operation {} into solution => {}", operation, err);
+            }
+        }
+        let text = std::str::from_utf8(&message).unwrap_or("");
+        self.current_solution.get_buffer().unwrap().set_text(text);
     }
 
     view! {
@@ -200,14 +220,17 @@ impl Widget for SolutionComponent {
 pub struct AppModel {
     tiles: [u32; 6],
     target: u32,
+    relm: Relm<Win>,
 }
 
 #[derive(Msg)]
 pub enum AppMsg {
     Quit,
     Solve,
+    UpdateNoSolution,
     UpdateSolverTile(usize, u32),
     UpdateSolverTarget(u32),
+    UpdateSolution(Solution),
 }
 
 use self::TilesMsg::*;
@@ -216,10 +239,11 @@ use self::AppMsg::*;
 
 #[widget]
 impl Widget for Win {
-    fn model() -> AppModel {
+    fn model(relm: &Relm<Self>, _: ()) -> AppModel {
         AppModel {
             tiles: [1; 6],
             target: 1,
+            relm: relm.clone(),
         }
     }
 
@@ -232,15 +256,29 @@ impl Widget for Win {
             },
             AppMsg::UpdateSolverTarget(new_val) => {
                 self.model.target = new_val;
+            },
+            AppMsg::UpdateSolution(solution) => {
+                self.solutions.emit(SolutionMsg::ShowSolution(solution));
+            },
+            AppMsg::UpdateNoSolution => {
+                self.solutions.emit(SolutionMsg::SetNoSolution);
             }
         }
     }
 
     fn solve(&mut self) {
-        /////////////////////////////////////
-        println!("{:?}", self.model.tiles);
-        println!("{}", self.model.target);
-        /////////////////////////////////////
+        let tiles = self.model.tiles;
+        let target = self.model.target;
+        let stream = self.model.relm.stream().clone();
+
+        let solutions = solve(tiles.to_vec(), target);
+        if solutions.len() > 0 {
+            let solution_to_print = solutions[0].clone();
+            stream.emit(UpdateSolution(solution_to_print));
+        }
+        else {
+            stream.emit(UpdateNoSolution);
+        }
     }
 
     view! {
@@ -265,6 +303,7 @@ impl Widget for Win {
                     clicked(_) => Solve,
                 },
 
+                #[name="solutions"]
                 SolutionComponent {},
             },
 

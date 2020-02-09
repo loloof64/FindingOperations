@@ -13,7 +13,7 @@ pub enum Operator {
 
 impl Operator {
     pub fn iterator() -> Iter<'static, Self> {
-        [Operator::Add, Operator::Sub, Operator::Mul, Operator::Div].into_iter()
+        [Operator::Add, Operator::Sub, Operator::Mul, Operator::Div].iter()
     }
 }
 
@@ -115,7 +115,7 @@ impl Clone for Operation {
 }
 
 pub struct Solution {
-    operations: Vec<Operation>,
+    pub operations: Vec<Operation>,
 }
 
 impl Solution {
