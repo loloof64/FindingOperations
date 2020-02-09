@@ -161,7 +161,7 @@ use self::SolutionMsg::*;
 #[widget]
 impl Widget for SolutionComponent {
     fn init_view(&mut self) {
-        self.current_solution.get_buffer().unwrap().set_text("\n\n\n\n");
+        self.current_solution.set_text("\n\n\n\n");
     }
 
     fn model() -> SolutionModel {
@@ -172,7 +172,7 @@ impl Widget for SolutionComponent {
 
     fn update(&mut self, msg: SolutionMsg) {
         match msg {
-            SetNoSolution => self.current_solution.get_buffer().unwrap().set_text("\n\nNo solution\n\n"),
+            SetNoSolution => self.current_solution.set_text("\n\nNo solution\n\n"),
             ShowSolution(sol) => self.update_with_solution(&sol),
         }
     }
@@ -180,12 +180,12 @@ impl Widget for SolutionComponent {
     fn update_with_solution(&mut self, solution: &Solution) {
         let mut message = Vec::new();
         for operation in solution.operations.clone() {
-            if let Err(err) = write!(&mut message, "{}", operation) {
+            if let Err(err) = write!(&mut message, "{}\n", operation) {
                 println!("Failed to append operation {} into solution => {}", operation, err);
             }
         }
         let text = std::str::from_utf8(&message).unwrap_or("");
-        self.current_solution.get_buffer().unwrap().set_text(text);
+        self.current_solution.set_text(text);
     }
 
     view! {
@@ -209,10 +209,7 @@ impl Widget for SolutionComponent {
                 },
             },
             #[name="current_solution"]
-            gtk::TextView {
-                editable: false,
-
-            }
+            gtk::Label {}
         }
     }
 }

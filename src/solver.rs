@@ -269,6 +269,9 @@ fn resolve_recur(
                 local_current_solutions.push(operation.clone());
 
                 if operation.value() == target_result {
+                    /////////////////////////////////////////////////////
+                    println!("{:?}", local_current_solutions.clone());
+                    /////////////////////////////////////////////////////
                     solutions.push(local_current_solutions.clone());
                     break 'outer_loop;
                 } else {
