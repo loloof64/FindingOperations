@@ -38,6 +38,16 @@ mod tests {
     }
 
     #[test]
+    fn test_invalid_multiplication_creation_3() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Mul, 1, 5));
+    }
+
+    #[test]
+    fn test_invalid_multiplication_creation_4() {
+        assert_eq!(None::<Operation>, Operation::new(Operator::Mul, 5, 1));
+    }
+
+    #[test]
     fn test_invalid_division_creation_1() {
         assert_eq!(None::<Operation>, Operation::new(Operator::Div, 5, 2));
     }
@@ -216,6 +226,9 @@ mod tests {
 pub fn solve(tiles: Vec<u32>, target_result: u32) -> Vec<Solution> {
     let working_tiles = get_working_tiles_from_inputs(&tiles);
     let mut solutions: Vec<Solution> = Vec::new();
+    //////////////////////////////////////////////////
+    println!("---------------------------------------------");
+    //////////////////////////////////////////////////
     resolve_recur(
         working_tiles,
         target_result,
@@ -242,6 +255,9 @@ fn resolve_recur(
     solutions: &mut Vec<Solution>,
     current_solution: Solution,
 ) { 
+    /////////////////////////////////////////////////
+    println!("Resolve({:?}, {}, {:?})", &working_tiles, target_result, &current_solution);
+    /////////////////////////////////////////////////
     let working_tiles_len = working_tiles.len();
 
     'outer_loop: for first_tile_index in 0..working_tiles_len {
@@ -269,9 +285,6 @@ fn resolve_recur(
                 local_current_solutions.push(operation.clone());
 
                 if operation.value() == target_result {
-                    /////////////////////////////////////////////////////
-                    println!("{:?}", local_current_solutions.clone());
-                    /////////////////////////////////////////////////////
                     solutions.push(local_current_solutions.clone());
                     break 'outer_loop;
                 } else {

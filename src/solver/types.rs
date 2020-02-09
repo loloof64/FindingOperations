@@ -56,6 +56,11 @@ impl Operation {
                         Some(Operation {operand_1, operand_2, operator})
                     } else {None}
                 },
+                Operator::Mul => {
+                    if operand_1 > 1 && operand_2 > 1 {
+                        Some(Operation {operand_1, operand_2, operator})
+                    } else {None}
+                },
                 _ => Some(Operation {
                     operand_1,
                     operand_2,
