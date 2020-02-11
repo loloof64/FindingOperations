@@ -35,6 +35,11 @@ pub struct Operation {
     operator: Operator,
 }
 
+/// Operation builds an Operation data from two operands and an operator, but :
+/// - Any operation which has at least a 0 as operand, as unuseful is considered invalid and returns None
+/// - Any subtraction which leads to a 0 or negative value is also considered invalid
+/// - Any division which do not leads to an integer result (without any remainder) is considered invalid
+/// - Any multiplication by 1 is considered invalid
 impl Operation {
     pub fn new(operator: Operator, operand_1: u32, operand_2: u32) -> Option<Self> {
         if operand_1 == 0 || operand_2 == 0 { None }
